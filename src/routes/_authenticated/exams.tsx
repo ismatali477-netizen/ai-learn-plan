@@ -109,8 +109,10 @@ function ExamsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold">{e.title}</h3>
-                    {/* @ts-expect-error nested join */}
-                    {e.subjects && <Badge variant="outline" style={{ borderColor: e.subjects.color, color: e.subjects.color }}>{e.subjects.name}</Badge>}
+                    {(() => {
+                      const s = (e as unknown as { subjects?: { name: string; color: string } }).subjects;
+                      return s ? <Badge variant="outline" style={{ borderColor: s.color, color: s.color }}>{s.name}</Badge> : null;
+                    })()}
                     <Badge variant="secondary">Importance {e.importance}/5</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{format(parseISO(e.exam_date), "EEEE, MMMM d, yyyy")}</p>
