@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          threshold_type: string
+          threshold_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          threshold_type: string
+          threshold_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          threshold_type?: string
+          threshold_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       exams: {
         Row: {
           created_at: string
@@ -58,6 +94,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -66,6 +135,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          learning_goal: string | null
+          level: number
           streak_days: number
           updated_at: string
           xp: number
@@ -77,6 +148,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          learning_goal?: string | null
+          level?: number
           streak_days?: number
           updated_at?: string
           xp?: number
@@ -88,6 +161,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          learning_goal?: string | null
+          level?: number
           streak_days?: number
           updated_at?: string
           xp?: number
@@ -285,6 +360,77 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          notifications_enabled: boolean
+          pomodoro_break_minutes: number
+          pomodoro_long_break_minutes: number
+          pomodoro_work_minutes: number
+          preferred_days: Json
+          preferred_end_hour: number
+          preferred_start_hour: number
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          notifications_enabled?: boolean
+          pomodoro_break_minutes?: number
+          pomodoro_long_break_minutes?: number
+          pomodoro_work_minutes?: number
+          preferred_days?: Json
+          preferred_end_hour?: number
+          preferred_start_hour?: number
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          notifications_enabled?: boolean
+          pomodoro_break_minutes?: number
+          pomodoro_long_break_minutes?: number
+          pomodoro_work_minutes?: number
+          preferred_days?: Json
+          preferred_end_hour?: number
+          preferred_start_hour?: number
+          theme?: string
           updated_at?: string
           user_id?: string
         }
