@@ -3,13 +3,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toggleTaskComplete } from "@/lib/study.functions";
+import { syncProgress, syncReminders } from "@/lib/gamification.functions";
+import { celebrateAchievements } from "@/components/AchievementToast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Trophy, Target, CalendarDays, Wand2, BookOpen, Loader2 } from "lucide-react";
+import { Flame, Trophy, Target, CalendarDays, Wand2, BookOpen, Loader2, Timer, Award } from "lucide-react";
 import { format, differenceInCalendarDays, isToday, parseISO } from "date-fns";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — AI Study Planner" }] }),
@@ -20,6 +23,20 @@ function DashboardPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const toggle = useServerFn(toggleTaskComplete);
+  const sync = useServerFn(syncProgress);
+  const reminders = useServerFn(syncReminders);
+
+  // On mount: refresh streak/xp/achievements + generate reminders for today
+  useEffect(() => {
+    sync({ data: undefined as any }).then((r) => {
+      celebrateAchievements(r.newly_earned);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    }).catch(() => { /* ignore */ });
+    reminders({ data: undefined as any }).then(() => {
+      qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    }).catch(() => { /* ignore */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -78,12 +95,18 @@ function DashboardPage() {
 
   const mutate = useMutation({
     mutationFn: (vars: { id: string; completed: boolean }) => toggle({ data: vars }),
-    onSuccess: () => {
+    onSuccess: async (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["weekstats"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
+      if (vars.completed) {
+        try { const r = await sync({ data: undefined as any }); celebrateAchievements(r.newly_earned); } catch { /* ignore */ }
+      }
     },
   });
+
+  // Quick "Start session" link
+  void Timer;
 
   const goal = profile.data?.daily_study_minutes_goal ?? 120;
   const todayMinutes = (todayTasks.data ?? []).filter((t) => t.status === "completed").reduce((a, t) => a + (t.duration_minutes || 0), 0);
@@ -100,7 +123,8 @@ function DashboardPage() {
         </Link>
       </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+        <StatCard icon={Award} label="Level" value={`${profile.data?.level ?? 1}`} accent="from-violet-500 to-fuchsia-500" sub={`${profile.data?.xp ?? 0} XP`} />
         <StatCard icon={Flame} label="Streak" value={`${profile.data?.streak_days ?? 0} days`} accent="from-orange-500 to-rose-500" />
         <StatCard icon={Trophy} label="Total XP" value={`${profile.data?.xp ?? 0}`} accent="from-amber-400 to-orange-500" />
         <StatCard icon={Target} label="This week" value={`${weekStats.data?.rate ?? 0}%`} accent="from-primary to-secondary" sub={`${weekStats.data?.completed ?? 0}/${weekStats.data?.total ?? 0} tasks`} />

@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { syncProgress } from "@/lib/gamification.functions";
+import { celebrateAchievements } from "@/components/AchievementToast";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/exams")({
 function ExamsPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
+  const sync = useServerFn(syncProgress);
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -46,10 +50,11 @@ function ExamsPage() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Exam added");
       setOpen(false); setTitle(""); setDate(""); setTopics(""); setImportance(3); setSubjectId(undefined);
       qc.invalidateQueries({ queryKey: ["exams"] });
+      try { const r = await sync({ data: undefined as any }); celebrateAchievements(r.newly_earned); } catch { /* ignore */ }
     },
     onError: (e: Error) => toast.error(e.message),
   });

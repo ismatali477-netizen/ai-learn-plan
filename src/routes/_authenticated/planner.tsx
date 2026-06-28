@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { generateStudyPlan } from "@/lib/study.functions";
+import { syncProgress } from "@/lib/gamification.functions";
+import { celebrateAchievements } from "@/components/AchievementToast";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,7 @@ function PlannerPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const generate = useServerFn(generateStudyPlan);
+  const sync = useServerFn(syncProgress);
 
   const today = new Date().toISOString().slice(0, 10);
   const twoWeeks = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
@@ -44,10 +47,11 @@ function PlannerPage() {
 
   const mut = useMutation({
     mutationFn: () => generate({ data: { title, start_date: start, end_date: end, daily_minutes: minutes, focus } }),
-    onSuccess: (r) => {
+    onSuccess: async (r) => {
       toast.success(`Plan ready — ${r.task_count} tasks scheduled`);
       qc.invalidateQueries({ queryKey: ["plans"] });
       qc.invalidateQueries({ queryKey: ["tasks"] });
+      try { const s = await sync({ data: undefined as any }); celebrateAchievements(s.newly_earned); } catch { /* ignore */ }
     },
     onError: (e: Error) => toast.error(e.message),
   });

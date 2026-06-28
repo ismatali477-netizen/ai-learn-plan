@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { syncProgress } from "@/lib/gamification.functions";
+import { celebrateAchievements } from "@/components/AchievementToast";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +24,7 @@ const COLORS = ["#2563EB", "#7C3AED", "#06B6D4", "#10B981", "#F59E0B", "#EF4444"
 function SubjectsPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
+  const sync = useServerFn(syncProgress);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
@@ -40,10 +44,11 @@ function SubjectsPage() {
       const { error } = await supabase.from("subjects").insert({ user_id: user.id, name, color, difficulty, notes: notes || null });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Subject added");
       setOpen(false); setName(""); setNotes(""); setDifficulty(3); setColor(COLORS[0]);
       qc.invalidateQueries({ queryKey: ["subjects"] });
+      try { const r = await sync({ data: undefined as any }); celebrateAchievements(r.newly_earned); } catch { /* ignore */ }
     },
     onError: (e: Error) => toast.error(e.message),
   });
