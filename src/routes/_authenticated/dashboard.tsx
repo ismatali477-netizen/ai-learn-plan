@@ -95,12 +95,18 @@ function DashboardPage() {
 
   const mutate = useMutation({
     mutationFn: (vars: { id: string; completed: boolean }) => toggle({ data: vars }),
-    onSuccess: () => {
+    onSuccess: async (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["weekstats"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
+      if (vars.completed) {
+        try { const r = await sync({ data: undefined as any }); celebrateAchievements(r.newly_earned); } catch { /* ignore */ }
+      }
     },
   });
+
+  // Quick "Start session" link
+  void Timer;
 
   const goal = profile.data?.daily_study_minutes_goal ?? 120;
   const todayMinutes = (todayTasks.data ?? []).filter((t) => t.status === "completed").reduce((a, t) => a + (t.duration_minutes || 0), 0);
