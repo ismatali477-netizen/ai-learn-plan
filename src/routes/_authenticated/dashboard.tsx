@@ -117,7 +117,8 @@ function DashboardPage() {
         </Link>
       </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+        <StatCard icon={Award} label="Level" value={`${profile.data?.level ?? 1}`} accent="from-violet-500 to-fuchsia-500" sub={`${profile.data?.xp ?? 0} XP`} />
         <StatCard icon={Flame} label="Streak" value={`${profile.data?.streak_days ?? 0} days`} accent="from-orange-500 to-rose-500" />
         <StatCard icon={Trophy} label="Total XP" value={`${profile.data?.xp ?? 0}`} accent="from-amber-400 to-orange-500" />
         <StatCard icon={Target} label="This week" value={`${weekStats.data?.rate ?? 0}%`} accent="from-primary to-secondary" sub={`${weekStats.data?.completed ?? 0}/${weekStats.data?.total ?? 0} tasks`} />
