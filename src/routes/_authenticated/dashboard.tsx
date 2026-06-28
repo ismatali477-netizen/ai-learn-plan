@@ -3,13 +3,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toggleTaskComplete } from "@/lib/study.functions";
+import { syncProgress, syncReminders } from "@/lib/gamification.functions";
+import { celebrateAchievements } from "@/components/AchievementToast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Trophy, Target, CalendarDays, Wand2, BookOpen, Loader2 } from "lucide-react";
+import { Flame, Trophy, Target, CalendarDays, Wand2, BookOpen, Loader2, Timer, Award } from "lucide-react";
 import { format, differenceInCalendarDays, isToday, parseISO } from "date-fns";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — AI Study Planner" }] }),
@@ -20,6 +23,20 @@ function DashboardPage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const toggle = useServerFn(toggleTaskComplete);
+  const sync = useServerFn(syncProgress);
+  const reminders = useServerFn(syncReminders);
+
+  // On mount: refresh streak/xp/achievements + generate reminders for today
+  useEffect(() => {
+    sync({ data: undefined as any }).then((r) => {
+      celebrateAchievements(r.newly_earned);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    }).catch(() => { /* ignore */ });
+    reminders({ data: undefined as any }).then(() => {
+      qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+    }).catch(() => { /* ignore */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const today = new Date().toISOString().slice(0, 10);
 
