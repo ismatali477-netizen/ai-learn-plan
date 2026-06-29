@@ -39,6 +39,7 @@ const SECONDARY_NAV = [
 function AppShell() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const unread = useQuery({
