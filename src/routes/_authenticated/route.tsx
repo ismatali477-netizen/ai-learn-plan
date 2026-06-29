@@ -120,8 +120,8 @@ function AppShell() {
         {mobileOpen && (
           <div className="md:hidden fixed inset-0 top-14 z-20 bg-background overflow-y-auto">
             <nav className="p-3 space-y-1">
-              {NAV.map((n) => (
-                <Link key={n.to} to={n.to} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
+              {[...NAV, ...SECONDARY_NAV].map((n) => (
+                <Link key={n.to} to={n.to} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted transition-colors" activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium bg-primary/10 text-primary" }}>
                   <n.icon className="size-5" /> {n.label}
                 </Link>
               ))}
