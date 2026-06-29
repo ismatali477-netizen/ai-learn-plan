@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Sparkles, BookOpen, Calendar, Target, BarChart3, ListChecks, CalendarRange,
@@ -86,8 +86,8 @@ function Nav() {
             ))}
           </nav>
           <div className="hidden items-center gap-2 md:flex">
-            <a href="#login" className="text-sm font-medium text-foreground/80 hover:text-foreground">Log in</a>
-            <CTAButton href="#cta">Start free</CTAButton>
+            <Link to="/auth" className="text-sm font-medium text-foreground/80 hover:text-foreground">Log in</Link>
+            <CTAButton to="/auth">Start free</CTAButton>
           </div>
           <button className="md:hidden" onClick={() => setOpen(v => !v)} aria-label="Toggle menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -99,7 +99,8 @@ function Nav() {
               {links.map(([l, h]) => (
                 <a key={h} href={h} onClick={() => setOpen(false)} className="text-sm text-foreground/80">{l}</a>
               ))}
-              <CTAButton href="#cta">Start free</CTAButton>
+              <Link to="/auth" onClick={() => setOpen(false)} className="text-sm font-medium text-foreground/80">Log in</Link>
+              <CTAButton to="/auth">Start free</CTAButton>
             </div>
           </div>
         )}
@@ -117,17 +118,17 @@ function Logo() {
   );
 }
 
-function CTAButton({ children, href = "#", variant = "primary" as "primary" | "ghost" | "dark" }: any) {
+function CTAButton({ children, href, to, variant = "primary" as "primary" | "ghost" | "dark" }: any) {
   const base = "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all";
-  if (variant === "ghost") return <a href={href} className={`${base} border border-border bg-background text-foreground hover:bg-muted`}>{children}</a>;
-  if (variant === "dark") return <a href={href} className={`${base} bg-[var(--ink)] text-[var(--ink-foreground)] hover:opacity-90`}>{children}</a>;
-  return (
-    <a href={href}
-       className={`${base} text-white shadow-elegant hover:brightness-110 hover:-translate-y-0.5`}
-       style={{ backgroundImage: "var(--gradient-primary)" }}>
-      {children}
-    </a>
-  );
+  const cls =
+    variant === "ghost"
+      ? `${base} border border-border bg-background text-foreground hover:bg-muted`
+      : variant === "dark"
+      ? `${base} bg-[var(--ink)] text-[var(--ink-foreground)] hover:opacity-90`
+      : `${base} text-white shadow-elegant hover:brightness-110 hover:-translate-y-0.5`;
+  const style = variant === "primary" ? { backgroundImage: "var(--gradient-primary)" } : undefined;
+  if (to) return <Link to={to} className={cls} style={style}>{children}</Link>;
+  return <a href={href ?? "#"} className={cls} style={style}>{children}</a>;
 }
 
 /* ---------------- HERO ---------------- */
@@ -153,7 +154,7 @@ function Hero() {
             AI Study Planner builds personalized schedules from your subjects, exams, and available hours — then adapts daily so you always know exactly what to study next.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <CTAButton href="#cta">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
+            <CTAButton to="/auth">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
             <CTAButton href="#demo" variant="ghost"><Play className="h-4 w-4" /> See Demo</CTAButton>
           </div>
           <p className="mt-4 text-xs text-muted-foreground">No credit card · Free forever plan · Cancel anytime</p>
@@ -624,7 +625,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <CTAButton href="#cta" variant={p.variant as any}>{p.cta}</CTAButton>
+              <CTAButton to="/auth" variant={p.variant as any}>{p.cta}</CTAButton>
             </div>
           ))}
         </div>
@@ -683,7 +684,7 @@ function Contact() {
                 Join 10,000+ students who turned scattered study sessions into a structured path to top performance.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <CTAButton href="#">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
+                <CTAButton to="/auth">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
                 <a href="mailto:hello@aistudyplanner.com" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Talk to us</a>
               </div>
               <p className="mt-6 text-xs text-white/50">support@aistudyplanner.com</p>
