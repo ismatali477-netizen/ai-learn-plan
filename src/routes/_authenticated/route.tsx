@@ -20,15 +20,19 @@ export const Route = createFileRoute("/_authenticated")({
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/planner", label: "AI Planner", icon: Wand2 },
-  { to: "/sessions", label: "Sessions", icon: Timer },
-  { to: "/pomodoro", label: "Pomodoro", icon: Timer },
+  { to: "/planner", label: "Planner", icon: Wand2 },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/exams", label: "Exams", icon: CalendarDays },
+  { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/achievements", label: "Achievements", icon: Trophy },
+  { to: "/notifications", label: "Notifications", icon: Bell },
+] as const;
+
+const SECONDARY_NAV = [
+  { to: "/sessions", label: "Sessions", icon: Timer },
+  { to: "/pomodoro", label: "Pomodoro", icon: Timer },
   { to: "/reports", label: "Reports", icon: FileText },
-  { to: "/profile", label: "Profile", icon: UserCircle },
+  { to: "/profile", label: "Settings", icon: UserCircle },
 ] as const;
 
 function AppShell() {
@@ -72,16 +76,22 @@ function AppShell() {
               activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
             >
               <n.icon className="size-4" /> {n.label}
+              {n.to === "/notifications" && unread.data ? (
+                <span className="ml-auto rounded-full bg-primary text-primary-foreground text-xs px-1.5 min-w-5 h-5 grid place-items-center">{unread.data}</span>
+              ) : null}
             </Link>
           ))}
-          <Link
-            to="/notifications"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
-          >
-            <Bell className="size-4" /> Notifications
-            {unread.data ? <span className="ml-auto rounded-full bg-primary text-primary-foreground text-xs px-1.5 min-w-5 h-5 grid place-items-center">{unread.data}</span> : null}
-          </Link>
+          <div className="my-2 border-t" />
+          {SECONDARY_NAV.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
+            >
+              <n.icon className="size-4" /> {n.label}
+            </Link>
+          ))}
         </nav>
         <div className="p-3 border-t shrink-0">
           <div className="px-2 py-2 text-xs text-muted-foreground truncate">{user.email}</div>
@@ -110,8 +120,8 @@ function AppShell() {
         {mobileOpen && (
           <div className="md:hidden fixed inset-0 top-14 z-20 bg-background overflow-y-auto">
             <nav className="p-3 space-y-1">
-              {NAV.map((n) => (
-                <Link key={n.to} to={n.to} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted">
+              {[...NAV, ...SECONDARY_NAV].map((n) => (
+                <Link key={n.to} to={n.to} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted transition-colors" activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium bg-primary/10 text-primary" }}>
                   <n.icon className="size-5" /> {n.label}
                 </Link>
               ))}
