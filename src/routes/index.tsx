@@ -86,8 +86,8 @@ function Nav() {
             ))}
           </nav>
           <div className="hidden items-center gap-2 md:flex">
-            <a href="#login" className="text-sm font-medium text-foreground/80 hover:text-foreground">Log in</a>
-            <CTAButton href="#cta">Start free</CTAButton>
+            <Link to="/auth" className="text-sm font-medium text-foreground/80 hover:text-foreground">Log in</Link>
+            <CTAButton to="/auth">Start free</CTAButton>
           </div>
           <button className="md:hidden" onClick={() => setOpen(v => !v)} aria-label="Toggle menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -99,7 +99,8 @@ function Nav() {
               {links.map(([l, h]) => (
                 <a key={h} href={h} onClick={() => setOpen(false)} className="text-sm text-foreground/80">{l}</a>
               ))}
-              <CTAButton href="#cta">Start free</CTAButton>
+              <Link to="/auth" onClick={() => setOpen(false)} className="text-sm font-medium text-foreground/80">Log in</Link>
+              <CTAButton to="/auth">Start free</CTAButton>
             </div>
           </div>
         )}
