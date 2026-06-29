@@ -625,7 +625,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <CTAButton href="#cta" variant={p.variant as any}>{p.cta}</CTAButton>
+              <CTAButton to="/auth" variant={p.variant as any}>{p.cta}</CTAButton>
             </div>
           ))}
         </div>
