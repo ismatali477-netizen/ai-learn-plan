@@ -155,7 +155,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <CTAButton to="/auth">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
-            <CTAButton href="#dashboard-preview" variant="ghost"><Play className="h-4 w-4" /> See Demo</CTAButton>
+            <CTAButton href="#demo" variant="ghost"><Play className="h-4 w-4" /> See Demo</CTAButton>
           </div>
           <p className="mt-4 text-xs text-muted-foreground">No credit card · Free forever plan · Cancel anytime</p>
         </div>
