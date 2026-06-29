@@ -684,7 +684,7 @@ function Contact() {
                 Join 10,000+ students who turned scattered study sessions into a structured path to top performance.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <CTAButton href="#">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
+                <CTAButton to="/auth">Start Planning Free <ArrowRight className="h-4 w-4" /></CTAButton>
                 <a href="mailto:hello@aistudyplanner.com" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Talk to us</a>
               </div>
               <p className="mt-6 text-xs text-white/50">support@aistudyplanner.com</p>
