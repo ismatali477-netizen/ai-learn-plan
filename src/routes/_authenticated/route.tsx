@@ -5,8 +5,9 @@ import {
   BarChart3, Timer, Trophy, Bell, UserCircle, FileText, Menu, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -38,6 +39,7 @@ const SECONDARY_NAV = [
 function AppShell() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const unread = useQuery({
@@ -54,8 +56,11 @@ function AppShell() {
   });
 
   const signOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
-    router.navigate({ to: "/auth", replace: true });
+    router.navigate({ to: "/", replace: true });
+    toast.success("Successfully logged out");
   };
 
   return (
