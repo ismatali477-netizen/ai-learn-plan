@@ -76,16 +76,22 @@ function AppShell() {
               activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
             >
               <n.icon className="size-4" /> {n.label}
+              {n.to === "/notifications" && unread.data ? (
+                <span className="ml-auto rounded-full bg-primary text-primary-foreground text-xs px-1.5 min-w-5 h-5 grid place-items-center">{unread.data}</span>
+              ) : null}
             </Link>
           ))}
-          <Link
-            to="/notifications"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
-          >
-            <Bell className="size-4" /> Notifications
-            {unread.data ? <span className="ml-auto rounded-full bg-primary text-primary-foreground text-xs px-1.5 min-w-5 h-5 grid place-items-center">{unread.data}</span> : null}
-          </Link>
+          <div className="my-2 border-t" />
+          {SECONDARY_NAV.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
+            >
+              <n.icon className="size-4" /> {n.label}
+            </Link>
+          ))}
         </nav>
         <div className="p-3 border-t shrink-0">
           <div className="px-2 py-2 text-xs text-muted-foreground truncate">{user.email}</div>
