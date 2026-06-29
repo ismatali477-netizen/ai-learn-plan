@@ -118,17 +118,17 @@ function Logo() {
   );
 }
 
-function CTAButton({ children, href = "#", variant = "primary" as "primary" | "ghost" | "dark" }: any) {
+function CTAButton({ children, href, to, variant = "primary" as "primary" | "ghost" | "dark" }: any) {
   const base = "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all";
-  if (variant === "ghost") return <a href={href} className={`${base} border border-border bg-background text-foreground hover:bg-muted`}>{children}</a>;
-  if (variant === "dark") return <a href={href} className={`${base} bg-[var(--ink)] text-[var(--ink-foreground)] hover:opacity-90`}>{children}</a>;
-  return (
-    <a href={href}
-       className={`${base} text-white shadow-elegant hover:brightness-110 hover:-translate-y-0.5`}
-       style={{ backgroundImage: "var(--gradient-primary)" }}>
-      {children}
-    </a>
-  );
+  const cls =
+    variant === "ghost"
+      ? `${base} border border-border bg-background text-foreground hover:bg-muted`
+      : variant === "dark"
+      ? `${base} bg-[var(--ink)] text-[var(--ink-foreground)] hover:opacity-90`
+      : `${base} text-white shadow-elegant hover:brightness-110 hover:-translate-y-0.5`;
+  const style = variant === "primary" ? { backgroundImage: "var(--gradient-primary)" } : undefined;
+  if (to) return <Link to={to} className={cls} style={style}>{children}</Link>;
+  return <a href={href ?? "#"} className={cls} style={style}>{children}</a>;
 }
 
 /* ---------------- HERO ---------------- */
