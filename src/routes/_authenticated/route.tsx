@@ -20,15 +20,19 @@ export const Route = createFileRoute("/_authenticated")({
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/planner", label: "AI Planner", icon: Wand2 },
-  { to: "/sessions", label: "Sessions", icon: Timer },
-  { to: "/pomodoro", label: "Pomodoro", icon: Timer },
+  { to: "/planner", label: "Planner", icon: Wand2 },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/exams", label: "Exams", icon: CalendarDays },
+  { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/achievements", label: "Achievements", icon: Trophy },
+  { to: "/notifications", label: "Notifications", icon: Bell },
+] as const;
+
+const SECONDARY_NAV = [
+  { to: "/sessions", label: "Sessions", icon: Timer },
+  { to: "/pomodoro", label: "Pomodoro", icon: Timer },
   { to: "/reports", label: "Reports", icon: FileText },
-  { to: "/profile", label: "Profile", icon: UserCircle },
+  { to: "/profile", label: "Settings", icon: UserCircle },
 ] as const;
 
 function AppShell() {
