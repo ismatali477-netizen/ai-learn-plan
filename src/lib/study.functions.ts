@@ -112,29 +112,34 @@ export const toggleTaskComplete = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), completed: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("study_tasks")
-      .update({
-        status: data.completed ? "completed" : "pending",
-        completed_at: data.completed ? new Date().toISOString() : null,
-      })
-      .eq("id", data.id)
-      .eq("user_id", userId);
-    if (error) throw new Error(error.message);
 
     if (data.completed) {
-      await supabase.rpc; // noop placeholder; XP handled below
-      const { data: t } = await supabase
+      // Only transition non-completed → completed; prevents XP replay via toggle.
+      const { data: updated, error } = await supabase
         .from("study_tasks")
-        .select("duration_minutes")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
         .eq("id", data.id)
-        .single();
-      const xp = Math.max(5, Math.round((t?.duration_minutes ?? 30) / 3));
-      const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).single();
-      await supabase
-        .from("profiles")
-        .update({ xp: (prof?.xp ?? 0) + xp })
-        .eq("id", userId);
+        .eq("user_id", userId)
+        .neq("status", "completed")
+        .select("duration_minutes");
+      if (error) throw new Error(error.message);
+
+      if (updated && updated.length > 0) {
+        const xp = Math.max(5, Math.round((updated[0].duration_minutes ?? 30) / 3));
+        const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).single();
+        await supabase
+          .from("profiles")
+          .update({ xp: (prof?.xp ?? 0) + xp })
+          .eq("id", userId);
+      }
+    } else {
+      const { error } = await supabase
+        .from("study_tasks")
+        .update({ status: "pending", completed_at: null })
+        .eq("id", data.id)
+        .eq("user_id", userId);
+      if (error) throw new Error(error.message);
     }
     return { ok: true };
   });
+
