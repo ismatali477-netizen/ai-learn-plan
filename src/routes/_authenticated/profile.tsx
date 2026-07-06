@@ -180,6 +180,36 @@ function ProfilePage() {
       </Card>
 
       <Card className="p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2"><GraduationCap className="size-4 text-primary" /> Education (for AI Tutor)</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Education level</Label>
+            <Select value={educationLevel || "none"} onValueChange={(v) => setEducationLevel(v === "none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Not set</SelectItem>
+                {EDUCATION_LEVEL_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2"><Label>Course</Label><Input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="e.g. BSc CSIT" /></div>
+          <div className="space-y-2"><Label>Semester / Grade</Label><Input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Semester 3" /></div>
+          <div className="space-y-2"><Label>Faculty</Label><Input value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="e.g. Science" /></div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Preferred AI language</Label>
+            <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Auto (match my language)</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="ne">Nepali</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6 space-y-4">
         <h2 className="font-semibold">About you</h2>
         <div className="space-y-2"><Label>Email</Label><Input value={user.email ?? ""} disabled /></div>
         <div className="space-y-2"><Label>Full name</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} /></div>
