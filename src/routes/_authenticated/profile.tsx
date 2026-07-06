@@ -96,7 +96,16 @@ function ProfilePage() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName || null, learning_goal: learningGoal || null, daily_study_minutes_goal: dailyGoal })
+        .update({
+          full_name: fullName || null,
+          learning_goal: learningGoal || null,
+          daily_study_minutes_goal: dailyGoal,
+          education_level: educationLevel || null,
+          course: course || null,
+          semester: semester || null,
+          faculty: faculty || null,
+          preferred_language: preferredLanguage,
+        } as any)
         .eq("id", user.id);
       if (error) throw error;
       const { error: e2 } = await supabase
