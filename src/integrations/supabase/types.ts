@@ -50,6 +50,166 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          sources: Json | null
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          sources?: Json | null
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          sources?: Json | null
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_threads: {
+        Row: {
+          course: string | null
+          created_at: string
+          education_level: string | null
+          id: string
+          language: string
+          last_message_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string
+          education_level?: string | null
+          id?: string
+          language?: string
+          last_message_at?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course?: string | null
+          created_at?: string
+          education_level?: string | null
+          id?: string
+          language?: string
+          last_message_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          page_number: number | null
+          user_id: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          page_number?: number | null
+          user_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          page_number?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          filename: string
+          id: string
+          mime_type: string | null
+          page_count: number | null
+          size_bytes: number | null
+          status: string
+          storage_path: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          filename: string
+          id?: string
+          mime_type?: string | null
+          page_count?: number | null
+          size_bytes?: number | null
+          status?: string
+          storage_path: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          page_count?: number | null
+          size_bytes?: number | null
+          status?: string
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       exams: {
         Row: {
           created_at: string
@@ -94,6 +254,47 @@ export type Database = {
           },
         ]
       }
+      generated_content: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          kind: string
+          source_document_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          kind: string
+          source_document_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          source_document_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_content_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -130,39 +331,54 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          course: string | null
           created_at: string
           daily_study_minutes_goal: number
+          education_level: string | null
           email: string | null
+          faculty: string | null
           full_name: string | null
           id: string
           learning_goal: string | null
           level: number
+          preferred_language: string
+          semester: string | null
           streak_days: number
           updated_at: string
           xp: number
         }
         Insert: {
           avatar_url?: string | null
+          course?: string | null
           created_at?: string
           daily_study_minutes_goal?: number
+          education_level?: string | null
           email?: string | null
+          faculty?: string | null
           full_name?: string | null
           id: string
           learning_goal?: string | null
           level?: number
+          preferred_language?: string
+          semester?: string | null
           streak_days?: number
           updated_at?: string
           xp?: number
         }
         Update: {
           avatar_url?: string | null
+          course?: string | null
           created_at?: string
           daily_study_minutes_goal?: number
+          education_level?: string | null
           email?: string | null
+          faculty?: string | null
           full_name?: string | null
           id?: string
           learning_goal?: string | null
           level?: number
+          preferred_language?: string
+          semester?: string | null
           streak_days?: number
           updated_at?: string
           xp?: number
@@ -441,7 +657,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_document_chunks: {
+        Args: {
+          filter_document_id?: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          chunk_index: number
+          content: string
+          document_id: string
+          id: string
+          page_number: number
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

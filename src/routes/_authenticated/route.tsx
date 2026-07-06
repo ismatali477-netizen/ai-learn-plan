@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, LayoutDashboard, BookOpen, CalendarDays, Wand2, LogOut,
-  BarChart3, Timer, Trophy, Bell, UserCircle, FileText, Menu, X,
+  BarChart3, Timer, Trophy, Bell, UserCircle, FileText, Menu, X, Bot, FileStack,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +21,8 @@ export const Route = createFileRoute("/_authenticated")({
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/tutor", label: "AI Tutor", icon: Bot, highlight: true },
+  { to: "/documents", label: "Documents", icon: FileStack },
   { to: "/planner", label: "Planner", icon: Wand2 },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/exams", label: "Exams", icon: CalendarDays },
@@ -81,6 +83,9 @@ function AppShell() {
               activeProps={{ className: "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-primary/10 text-primary" }}
             >
               <n.icon className="size-4" /> {n.label}
+              {("highlight" in n && n.highlight) ? (
+                <span className="ml-auto rounded-md bg-gradient-to-r from-primary to-secondary text-white text-[10px] font-semibold px-1.5 py-0.5">NEW</span>
+              ) : null}
               {n.to === "/notifications" && unread.data ? (
                 <span className="ml-auto rounded-full bg-primary text-primary-foreground text-xs px-1.5 min-w-5 h-5 grid place-items-center">{unread.data}</span>
               ) : null}

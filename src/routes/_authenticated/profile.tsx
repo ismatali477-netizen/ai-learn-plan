@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, Upload, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EDUCATION_LEVEL_OPTIONS } from "@/lib/ai-tutor.functions";
+import { UserCircle, Upload, Loader2, GraduationCap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -42,6 +44,11 @@ function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [learningGoal, setLearningGoal] = useState("");
   const [dailyGoal, setDailyGoal] = useState(120);
+  const [educationLevel, setEducationLevel] = useState<string>("");
+  const [course, setCourse] = useState("");
+  const [semester, setSemester] = useState("");
+  const [faculty, setFaculty] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState<string>("auto");
   const [startH, setStartH] = useState(9);
   const [endH, setEndH] = useState(21);
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
@@ -57,6 +64,11 @@ function ProfilePage() {
       setFullName(profile.data.full_name ?? "");
       setLearningGoal(profile.data.learning_goal ?? "");
       setDailyGoal(profile.data.daily_study_minutes_goal ?? 120);
+      setEducationLevel((profile.data as any).education_level ?? "");
+      setCourse((profile.data as any).course ?? "");
+      setSemester((profile.data as any).semester ?? "");
+      setFaculty((profile.data as any).faculty ?? "");
+      setPreferredLanguage((profile.data as any).preferred_language ?? "auto");
     }
   }, [profile.data]);
 
@@ -84,7 +96,16 @@ function ProfilePage() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName || null, learning_goal: learningGoal || null, daily_study_minutes_goal: dailyGoal })
+        .update({
+          full_name: fullName || null,
+          learning_goal: learningGoal || null,
+          daily_study_minutes_goal: dailyGoal,
+          education_level: educationLevel || null,
+          course: course || null,
+          semester: semester || null,
+          faculty: faculty || null,
+          preferred_language: preferredLanguage,
+        } as any)
         .eq("id", user.id);
       if (error) throw error;
       const { error: e2 } = await supabase
@@ -154,6 +175,36 @@ function ProfilePage() {
               {uploading ? "Uploading..." : "Upload photo"}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">JPG/PNG up to 5 MB</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2"><GraduationCap className="size-4 text-primary" /> Education (for AI Tutor)</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Education level</Label>
+            <Select value={educationLevel || "none"} onValueChange={(v) => setEducationLevel(v === "none" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Not set</SelectItem>
+                {EDUCATION_LEVEL_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2"><Label>Course</Label><Input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="e.g. BSc CSIT" /></div>
+          <div className="space-y-2"><Label>Semester / Grade</Label><Input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Semester 3" /></div>
+          <div className="space-y-2"><Label>Faculty</Label><Input value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="e.g. Science" /></div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Preferred AI language</Label>
+            <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Auto (match my language)</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="ne">Nepali</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </Card>
