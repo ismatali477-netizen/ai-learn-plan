@@ -64,6 +64,11 @@ function ProfilePage() {
       setFullName(profile.data.full_name ?? "");
       setLearningGoal(profile.data.learning_goal ?? "");
       setDailyGoal(profile.data.daily_study_minutes_goal ?? 120);
+      setEducationLevel((profile.data as any).education_level ?? "");
+      setCourse((profile.data as any).course ?? "");
+      setSemester((profile.data as any).semester ?? "");
+      setFaculty((profile.data as any).faculty ?? "");
+      setPreferredLanguage((profile.data as any).preferred_language ?? "auto");
     }
   }, [profile.data]);
 
