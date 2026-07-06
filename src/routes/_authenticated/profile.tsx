@@ -44,6 +44,11 @@ function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [learningGoal, setLearningGoal] = useState("");
   const [dailyGoal, setDailyGoal] = useState(120);
+  const [educationLevel, setEducationLevel] = useState<string>("");
+  const [course, setCourse] = useState("");
+  const [semester, setSemester] = useState("");
+  const [faculty, setFaculty] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState<string>("auto");
   const [startH, setStartH] = useState(9);
   const [endH, setEndH] = useState(21);
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
