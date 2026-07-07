@@ -126,12 +126,14 @@ export const toggleTaskComplete = createServerFn({ method: "POST" })
 
       if (updated && updated.length > 0) {
         const xp = Math.max(5, Math.round((updated[0].duration_minutes ?? 30) / 3));
-        const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).single();
-        await supabase
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: prof } = await supabaseAdmin.from("profiles").select("xp").eq("id", userId).single();
+        await supabaseAdmin
           .from("profiles")
           .update({ xp: (prof?.xp ?? 0) + xp })
           .eq("id", userId);
       }
+
     } else {
       const { error } = await supabase
         .from("study_tasks")
