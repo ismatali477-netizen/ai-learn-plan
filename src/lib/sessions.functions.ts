@@ -21,9 +21,26 @@ export const endSession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), duration_minutes: z.number().int().min(0).max(1440), notes: z.string().max(500).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Fetch server-recorded start time to compute true elapsed duration.
+    const { data: session, error: fetchErr } = await supabase
+      .from("study_sessions")
+      .select("started_at, ended_at")
+      .eq("id", data.id)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (fetchErr) throw new Error(fetchErr.message);
+    if (!session || session.ended_at) return { ok: true, xp_earned: 0 };
+
+    const now = Date.now();
+    const startedMs = new Date(session.started_at).getTime();
+    const elapsedMinutes = Math.max(0, Math.floor((now - startedMs) / 60000));
+    // Trust server elapsed time; clamp client value to at most elapsed and 1440.
+    const durationMinutes = Math.min(data.duration_minutes, elapsedMinutes, 1440);
+
     const { data: updated, error } = await supabase
       .from("study_sessions")
-      .update({ ended_at: new Date().toISOString(), duration_minutes: data.duration_minutes, notes: data.notes ?? null })
+      .update({ ended_at: new Date(now).toISOString(), duration_minutes: durationMinutes, notes: data.notes ?? null })
       .eq("id", data.id)
       .eq("user_id", userId)
       .is("ended_at", null)
@@ -33,14 +50,15 @@ export const endSession = createServerFn({ method: "POST" })
     if (!updated) return { ok: true, xp_earned: 0 };
 
     // Award XP for time studied (1 XP per 2 min) — only on first end
-    const xp = Math.max(0, Math.round(data.duration_minutes / 2));
+    const xp = Math.max(0, Math.round(durationMinutes / 2));
     if (xp > 0) {
       const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
       await supabase.from("profiles").update({ xp: (prof?.xp ?? 0) + xp }).eq("id", userId);
     }
 
-    return { ok: true, xp_earned: xp };
+    return { ok: true, xp_earned: xp, duration_minutes: durationMinutes };
   });
+
 
 export const deleteSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
