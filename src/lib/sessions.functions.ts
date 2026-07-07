@@ -52,9 +52,11 @@ export const endSession = createServerFn({ method: "POST" })
     // Award XP for time studied (1 XP per 2 min) — only on first end
     const xp = Math.max(0, Math.round(durationMinutes / 2));
     if (xp > 0) {
-      const { data: prof } = await supabase.from("profiles").select("xp").eq("id", userId).maybeSingle();
-      await supabase.from("profiles").update({ xp: (prof?.xp ?? 0) + xp }).eq("id", userId);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: prof } = await supabaseAdmin.from("profiles").select("xp").eq("id", userId).maybeSingle();
+      await supabaseAdmin.from("profiles").update({ xp: (prof?.xp ?? 0) + xp }).eq("id", userId);
     }
+
 
     return { ok: true, xp_earned: xp, duration_minutes: durationMinutes };
   });
