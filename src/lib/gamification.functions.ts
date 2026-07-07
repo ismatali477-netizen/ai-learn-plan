@@ -130,7 +130,9 @@ export const syncProgress = createServerFn({ method: "POST" })
 
     const newXp = (prof?.xp ?? 0) + bonusXp;
     const newLevel = levelFromXp(newXp);
-    await supabase.from("profiles").update({ xp: newXp, level: newLevel, streak_days: streak }).eq("id", userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("profiles").update({ xp: newXp, level: newLevel, streak_days: streak }).eq("id", userId);
+
 
     return { newly_earned: newlyEarned, streak, xp: newXp, level: newLevel };
   });
