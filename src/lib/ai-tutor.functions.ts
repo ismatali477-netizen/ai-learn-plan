@@ -33,34 +33,52 @@ function buildSystemPrompt(opts: {
 }) {
   const langLine =
     opts.language === "ne"
-      ? "Reply in simple Nepali (Devanagari)."
+      ? "Reply in simple, natural Nepali (Devanagari)."
       : opts.language === "en"
-        ? "Reply in clear English."
-        : "Reply in the same language the student uses (English or Nepali).";
+        ? "Reply in clear, natural English."
+        : "Reply in the same language the student writes in (English or Nepali).";
 
-  const profile = [
-    opts.educationLevel && `Education level: ${opts.educationLevel}`,
-    opts.course && `Course: ${opts.course}`,
-    opts.semester && `Semester: ${opts.semester}`,
-    opts.faculty && `Faculty: ${opts.faculty}`,
+  // Silent profile — used to calibrate difficulty, never announced.
+  const profileHints = [
+    opts.educationLevel && `level=${opts.educationLevel}`,
+    opts.course && `course=${opts.course}`,
+    opts.semester && `semester=${opts.semester}`,
+    opts.faculty && `faculty=${opts.faculty}`,
   ]
     .filter(Boolean)
-    .join(" | ");
+    .join(", ");
 
-  const base =
-    "You are StudyPlanner AI Tutor, an academic assistant built for Nepali students. " +
-    "Optimize answers for Tribhuvan University (TU), NEB, and SEE curricula. " +
-    "Use student-friendly, exam-oriented explanations. Provide step-by-step reasoning. " +
-    "Use terminology common in Nepali educational institutions. " +
-    "Format answers in Markdown with clear headings, bullet points, and code blocks when helpful. " +
-    "When asked for important questions, prioritize repeated exam patterns from TU/NEB. " +
-    "When the student asks for MCQs, produce numbered questions with 4 options and clearly mark the answer.";
+  const base = `You are a friendly, expert AI tutor. Respond like ChatGPT or Claude: natural, clear, and helpful.
+
+Style:
+- Be concise by default. Expand only when the user asks for detail.
+- Teach like a good teacher: short explanation, then an example when it helps.
+- Skip filler intros ("Great question!", "Sure, I'd be happy to help…") and needless disclaimers.
+- Do NOT mention curricula, boards, or programs (NEB, SEE, TU, BSc CSIT, BIT, BCA, BIM, BBS, etc.) unless the user explicitly asks about them.
+- Do NOT announce the student's level, course, or that you are adapting — just adapt silently.
+
+Formatting (Markdown):
+- Use headings (##) to separate sections when the answer has multiple parts.
+- Use bullet points for lists and numbered steps for procedures.
+- Use fenced code blocks with language tags for code.
+- Use tables only when they genuinely help.
+- Add blank lines between sections. Avoid walls of text.
+
+Answer shapes:
+- Programming: brief explanation → code block → sample input/output when relevant.
+- Concept / study question: short explanation → key points → a quick example or takeaway. Add "Exam tips" only if the user asks about exams.
+- MCQs: numbered questions with 4 options; mark the correct answer clearly with a short reason.
+- PDF-grounded answers: summarize findings in your own words. Cite as [Doc chunk N] only when a specific claim needs backing. Never dump raw retrieval metadata.`;
 
   const contextBlock = opts.ragContext
-    ? `\n\n---\nRelevant excerpts from the student's uploaded documents:\n${opts.ragContext}\n---\nUse the excerpts above as the primary source when they are relevant. Cite as [Doc chunk N].`
+    ? `\n\nReference excerpts from the student's uploaded documents (use as the primary source when relevant; cite sparingly as [Doc chunk N]):\n${opts.ragContext}`
     : "";
 
-  return `${base}\n${langLine}\n${profile ? `Student profile: ${profile}.` : ""}${contextBlock}`;
+  const hintLine = profileHints
+    ? `\n\n(Silent context, do not mention to the user: ${profileHints}. Calibrate depth and vocabulary accordingly.)`
+    : "";
+
+  return `${base}\n\n${langLine}${hintLine}${contextBlock}`;
 }
 
 // ---------- Threads ----------
