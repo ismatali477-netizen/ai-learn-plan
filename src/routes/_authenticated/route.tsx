@@ -44,6 +44,7 @@ function AppShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const unread = useQuery({
     queryKey: ["notifications-unread", user.id],
@@ -57,6 +58,38 @@ function AppShell() {
     },
     refetchInterval: 60_000,
   });
+
+  // Sync theme from user_settings once per session
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("theme")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !data?.theme) return;
+      const remote = data.theme as Theme;
+      const local = (typeof window !== "undefined" && localStorage.getItem("app-theme")) as Theme | null;
+      if (!local && remote && remote !== theme) setTheme(remote);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
+
+  // Persist theme changes to user_settings (fire and forget)
+  useEffect(() => {
+    supabase.from("user_settings").upsert(
+      { user_id: user.id, theme },
+      { onConflict: "user_id" },
+    ).then(() => { /* ignore */ });
+  }, [theme, user.id]);
+
+  // Prefetch common routes after login for snappy navigation
+  useEffect(() => {
+    const paths = ["/dashboard", "/planner", "/subjects", "/exams", "/tutor", "/analytics"] as const;
+    paths.forEach((p) => { router.preloadRoute({ to: p }).catch(() => { /* ignore */ }); });
+  }, [router]);
 
   const signOut = async () => {
     await queryClient.cancelQueries();
