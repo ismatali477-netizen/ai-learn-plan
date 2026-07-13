@@ -31,6 +31,7 @@ function ProfilePage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const getSigned = useServerFn(getAvatarSignedUrl);
+  const { theme, setTheme } = useTheme();
   const fileInput = useRef<HTMLInputElement>(null);
 
   const profile = useQuery({
