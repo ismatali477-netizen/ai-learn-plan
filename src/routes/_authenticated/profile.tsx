@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EDUCATION_LEVEL_OPTIONS } from "@/lib/ai-tutor.functions";
-import { UserCircle, Upload, Loader2, GraduationCap } from "lucide-react";
+import { UserCircle, Upload, Loader2, GraduationCap, Palette } from "lucide-react";
+import { useTheme, type Theme } from "@/lib/theme";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
