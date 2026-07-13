@@ -121,6 +121,7 @@ function ProfilePage() {
           pomodoro_break_minutes: pbreak,
           pomodoro_long_break_minutes: plong,
           notifications_enabled: notifEnabled,
+          theme,
         }, { onConflict: "user_id" });
       if (e2) throw e2;
     },
