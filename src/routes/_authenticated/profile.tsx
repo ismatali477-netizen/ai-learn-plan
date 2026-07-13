@@ -213,6 +213,24 @@ function ProfilePage() {
       </Card>
 
       <Card className="p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2"><Palette className="size-4 text-primary" /> Appearance</h2>
+        <div className="space-y-2">
+          <Label>Theme</Label>
+          <Select value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+            <SelectTrigger className="max-w-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="system">System Default</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Applies instantly and syncs to your account.</p>
+        </div>
+      </Card>
+
+
+
+      <Card className="p-6 space-y-4">
         <h2 className="font-semibold">About you</h2>
         <div className="space-y-2"><Label>Email</Label><Input value={user.email ?? ""} disabled /></div>
         <div className="space-y-2"><Label>Full name</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} /></div>
