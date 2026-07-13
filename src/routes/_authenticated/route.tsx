@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ThemeToggle, useTheme, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
