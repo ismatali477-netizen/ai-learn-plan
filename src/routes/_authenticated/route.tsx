@@ -154,6 +154,7 @@ function AppShell() {
             <Sparkles className="size-4 text-primary" /> StudyPlanner
           </Link>
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <Link to="/notifications" aria-label="Notifications" className="relative p-2">
               <Bell className="size-5" />
               {unread.data ? <span className="absolute top-1 right-1 size-2 rounded-full bg-primary" /> : null}
