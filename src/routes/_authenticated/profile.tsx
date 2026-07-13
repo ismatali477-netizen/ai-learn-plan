@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EDUCATION_LEVEL_OPTIONS } from "@/lib/ai-tutor.functions";
-import { UserCircle, Upload, Loader2, GraduationCap } from "lucide-react";
+import { UserCircle, Upload, Loader2, GraduationCap, Palette } from "lucide-react";
+import { useTheme, type Theme } from "@/lib/theme";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -30,6 +31,7 @@ function ProfilePage() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const getSigned = useServerFn(getAvatarSignedUrl);
+  const { theme, setTheme } = useTheme();
   const fileInput = useRef<HTMLInputElement>(null);
 
   const profile = useQuery({
@@ -119,6 +121,7 @@ function ProfilePage() {
           pomodoro_break_minutes: pbreak,
           pomodoro_long_break_minutes: plong,
           notifications_enabled: notifEnabled,
+          theme,
         }, { onConflict: "user_id" });
       if (e2) throw e2;
     },
@@ -208,6 +211,24 @@ function ProfilePage() {
           </div>
         </div>
       </Card>
+
+      <Card className="p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2"><Palette className="size-4 text-primary" /> Appearance</h2>
+        <div className="space-y-2">
+          <Label>Theme</Label>
+          <Select value={theme} onValueChange={(v) => setTheme(v as Theme)}>
+            <SelectTrigger className="max-w-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="system">System Default</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Applies instantly and syncs to your account.</p>
+        </div>
+      </Card>
+
+
 
       <Card className="p-6 space-y-4">
         <h2 className="font-semibold">About you</h2>

@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ThemeToggle, useTheme, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -43,6 +44,7 @@ function AppShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const unread = useQuery({
     queryKey: ["notifications-unread", user.id],
@@ -57,6 +59,38 @@ function AppShell() {
     refetchInterval: 60_000,
   });
 
+  // Sync theme from user_settings once per session
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("theme")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !data?.theme) return;
+      const remote = data.theme as Theme;
+      const local = (typeof window !== "undefined" && localStorage.getItem("app-theme")) as Theme | null;
+      if (!local && remote && remote !== theme) setTheme(remote);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
+
+  // Persist theme changes to user_settings (fire and forget)
+  useEffect(() => {
+    supabase.from("user_settings").upsert(
+      { user_id: user.id, theme },
+      { onConflict: "user_id" },
+    ).then(() => { /* ignore */ });
+  }, [theme, user.id]);
+
+  // Prefetch common routes after login for snappy navigation
+  useEffect(() => {
+    const paths = ["/dashboard", "/planner", "/subjects", "/exams", "/tutor", "/analytics"] as const;
+    paths.forEach((p) => { router.preloadRoute({ to: p }).catch(() => { /* ignore */ }); });
+  }, [router]);
+
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -68,12 +102,15 @@ function AppShell() {
   return (
     <div className="min-h-screen flex bg-muted/30 text-foreground">
       <aside className="hidden md:flex w-60 flex-col border-r bg-background sticky top-0 h-screen">
-        <Link to="/dashboard" className="flex items-center gap-2 px-5 h-16 border-b shrink-0">
-          <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-secondary grid place-items-center text-white">
-            <Sparkles className="size-4" />
-          </div>
-          <span className="font-semibold">StudyPlanner</span>
-        </Link>
+        <div className="flex items-center justify-between px-3 h-16 border-b shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-secondary grid place-items-center text-white">
+              <Sparkles className="size-4" />
+            </div>
+            <span className="font-semibold">StudyPlanner</span>
+          </Link>
+          <ThemeToggle />
+        </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
           {NAV.map((n) => (
             <Link
@@ -117,6 +154,7 @@ function AppShell() {
             <Sparkles className="size-4 text-primary" /> StudyPlanner
           </Link>
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <Link to="/notifications" aria-label="Notifications" className="relative p-2">
               <Bell className="size-5" />
               {unread.data ? <span className="absolute top-1 right-1 size-2 rounded-full bg-primary" /> : null}
