@@ -102,12 +102,15 @@ function AppShell() {
   return (
     <div className="min-h-screen flex bg-muted/30 text-foreground">
       <aside className="hidden md:flex w-60 flex-col border-r bg-background sticky top-0 h-screen">
-        <Link to="/dashboard" className="flex items-center gap-2 px-5 h-16 border-b shrink-0">
-          <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-secondary grid place-items-center text-white">
-            <Sparkles className="size-4" />
-          </div>
-          <span className="font-semibold">StudyPlanner</span>
-        </Link>
+        <div className="flex items-center justify-between px-3 h-16 border-b shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-secondary grid place-items-center text-white">
+              <Sparkles className="size-4" />
+            </div>
+            <span className="font-semibold">StudyPlanner</span>
+          </Link>
+          <ThemeToggle />
+        </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
           {NAV.map((n) => (
             <Link
