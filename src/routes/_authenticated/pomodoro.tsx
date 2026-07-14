@@ -140,6 +140,7 @@ function PomodoroPage() {
   };
 
   const startTimer = async () => {
+    if (running) return; // no-op if already running
     if (phase === "work" && !sessionDbId) {
       try {
         const row: any = await startFn({ data: { subject_id: subjectId === "none" ? null : subjectId } });
@@ -147,11 +148,25 @@ function PomodoroPage() {
         setPhaseStartedAt(Date.now());
       } catch (e: any) { toast.error(e.message); return; }
     }
+    setHasStarted(true);
     setRunning(true);
+  };
+
+  const pauseTimer = () => {
+    // Stop ticking only — preserve remaining, session, phase. No XP, no reset.
+    setRunning(false);
+    if (tick.current) {
+      clearInterval(tick.current);
+      tick.current = null;
+    }
   };
 
   const reset = async () => {
     setRunning(false);
+    if (tick.current) {
+      clearInterval(tick.current);
+      tick.current = null;
+    }
     if (sessionDbId && phaseStartedAt) {
       const mins = Math.max(0, Math.round((Date.now() - phaseStartedAt) / 60000));
       if (mins > 0) {
@@ -163,6 +178,7 @@ function PomodoroPage() {
     }
     setSessionDbId(null); setPhaseStartedAt(null);
     setPhase("work");
+    setHasStarted(false);
     setRemaining(work * 60);
   };
 
