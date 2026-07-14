@@ -227,7 +227,7 @@ function PomodoroPage() {
 
           <div className="flex items-center justify-center gap-2 mt-4">
             {running ? (
-              <Button size="lg" variant="secondary" onClick={() => setRunning(false)} className="gap-2"><Pause className="size-4" /> Pause</Button>
+              <Button size="lg" variant="secondary" onClick={pauseTimer} className="gap-2"><Pause className="size-4" /> Pause</Button>
             ) : (
               <Button size="lg" onClick={startTimer} className="gap-2"><Play className="size-4" /> Start</Button>
             )}
