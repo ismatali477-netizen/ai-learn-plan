@@ -59,6 +59,7 @@ function PomodoroPage() {
   const [subjectId, setSubjectId] = useState("none");
   const [phase, setPhase] = useState<Phase>("work");
   const [running, setRunning] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [completedWork, setCompletedWork] = useState(0);
   const [remaining, setRemaining] = useState(work * 60);
   const [sessionDbId, setSessionDbId] = useState<string | null>(null);
@@ -66,10 +67,18 @@ function PomodoroPage() {
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const phaseMinutes = useMemo(() => (phase === "work" ? work : phase === "break" ? brk : longBrk), [phase, work, brk, longBrk]);
-  useEffect(() => { if (!running) setRemaining(phaseMinutes * 60); }, [phaseMinutes, running]);
+
+  // Only sync remaining to configured duration BEFORE the user has started
+  // (or after an explicit reset). Never touch remaining just because the
+  // timer was paused — that would wipe the paused countdown.
+  useEffect(() => {
+    if (!hasStarted) setRemaining(phaseMinutes * 60);
+  }, [phaseMinutes, hasStarted]);
 
   useEffect(() => {
     if (!running) return;
+    // Guard against duplicate intervals
+    if (tick.current) clearInterval(tick.current);
     tick.current = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -79,7 +88,12 @@ function PomodoroPage() {
         return r - 1;
       });
     }, 1000);
-    return () => { if (tick.current) clearInterval(tick.current); };
+    return () => {
+      if (tick.current) {
+        clearInterval(tick.current);
+        tick.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
@@ -126,6 +140,7 @@ function PomodoroPage() {
   };
 
   const startTimer = async () => {
+    if (running) return; // no-op if already running
     if (phase === "work" && !sessionDbId) {
       try {
         const row: any = await startFn({ data: { subject_id: subjectId === "none" ? null : subjectId } });
@@ -133,11 +148,25 @@ function PomodoroPage() {
         setPhaseStartedAt(Date.now());
       } catch (e: any) { toast.error(e.message); return; }
     }
+    setHasStarted(true);
     setRunning(true);
+  };
+
+  const pauseTimer = () => {
+    // Stop ticking only — preserve remaining, session, phase. No XP, no reset.
+    setRunning(false);
+    if (tick.current) {
+      clearInterval(tick.current);
+      tick.current = null;
+    }
   };
 
   const reset = async () => {
     setRunning(false);
+    if (tick.current) {
+      clearInterval(tick.current);
+      tick.current = null;
+    }
     if (sessionDbId && phaseStartedAt) {
       const mins = Math.max(0, Math.round((Date.now() - phaseStartedAt) / 60000));
       if (mins > 0) {
@@ -149,6 +178,7 @@ function PomodoroPage() {
     }
     setSessionDbId(null); setPhaseStartedAt(null);
     setPhase("work");
+    setHasStarted(false);
     setRemaining(work * 60);
   };
 
@@ -197,7 +227,7 @@ function PomodoroPage() {
 
           <div className="flex items-center justify-center gap-2 mt-4">
             {running ? (
-              <Button size="lg" variant="secondary" onClick={() => setRunning(false)} className="gap-2"><Pause className="size-4" /> Pause</Button>
+              <Button size="lg" variant="secondary" onClick={pauseTimer} className="gap-2"><Pause className="size-4" /> Pause</Button>
             ) : (
               <Button size="lg" onClick={startTimer} className="gap-2"><Play className="size-4" /> Start</Button>
             )}
