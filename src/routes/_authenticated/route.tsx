@@ -59,31 +59,35 @@ function AppShell() {
     refetchInterval: 60_000,
   });
 
-  // Sync theme from user_settings once per session
+  // Sync theme from user_settings; DB-saved preference wins over local on login.
+  const [themeSynced, setThemeSynced] = useState(false);
   useEffect(() => {
     let cancelled = false;
+    setThemeSynced(false);
     (async () => {
       const { data } = await supabase
         .from("user_settings")
         .select("theme")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (cancelled || !data?.theme) return;
-      const remote = data.theme as Theme;
-      const local = (typeof window !== "undefined" && localStorage.getItem("app-theme")) as Theme | null;
-      if (!local && remote && remote !== theme) setTheme(remote);
+      if (cancelled) return;
+      const remote = (data?.theme as Theme | undefined) ?? null;
+      if (remote && remote !== theme) setTheme(remote);
+      setThemeSynced(true);
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
-  // Persist theme changes to user_settings (fire and forget)
+  // Persist theme changes to user_settings only after remote sync completes,
+  // so we don't stomp a saved preference from another device with the local default.
   useEffect(() => {
+    if (!themeSynced) return;
     supabase.from("user_settings").upsert(
       { user_id: user.id, theme },
       { onConflict: "user_id" },
     ).then(() => { /* ignore */ });
-  }, [theme, user.id]);
+  }, [theme, user.id, themeSynced]);
 
   // Prefetch common routes after login for snappy navigation
   useEffect(() => {
