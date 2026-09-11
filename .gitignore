@@ -54,7 +54,3 @@ coverage
 # Misc
 *.local
 *.env.local
-
-
- lovable/
- supabase/
