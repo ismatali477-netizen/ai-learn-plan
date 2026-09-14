@@ -113,16 +113,6 @@ function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 lg:p-10 space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">{format(new Date(), "EEEE, MMMM d")}</p>
-          <h1 className="font-display text-4xl">\n</h1>
-        </div>
-        <Link to="/planner">
-          <Button className="gap-2"><Wand2 className="size-4" /> Generate new plan</Button>
-        </Link>
-      </header>
-
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         <StatCard icon={Award} label="Level" value={`${profile.data?.level ?? 1}`} accent="from-violet-500 to-fuchsia-500" sub={`${profile.data?.xp ?? 0} XP`} />
         <StatCard icon={Flame} label="Streak" value={`${profile.data?.streak_days ?? 0} days`} accent="from-orange-500 to-rose-500" />
