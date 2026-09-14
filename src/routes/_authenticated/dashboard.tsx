@@ -116,7 +116,7 @@ function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">{format(new Date(), "EEEE, MMMM d")}</p>
-          <h1 className="font-display text-4xl">Hi {profile.data?.full_name?.split(" ")[0] ?? "there"} 👋</h1>
+          <h1 className="font-display text-4xl">\n</h1>
         </div>
         <Link to="/planner">
           <Button className="gap-2"><Wand2 className="size-4" /> Generate new plan</Button>
