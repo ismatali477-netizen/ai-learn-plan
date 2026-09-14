@@ -29,14 +29,24 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.navigate({ to: "/dashboard", replace: true });
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) router.navigate({ to: "/dashboard", replace: true });
-    });
-    return () => sub.subscription.unsubscribe();
+    let unsubscribe: (() => void) | undefined;
+    try {
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (data.session) router.navigate({ to: "/dashboard", replace: true });
+        })
+        .catch(() => { /* ignore — keep the form usable */ });
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+        if (session) router.navigate({ to: "/dashboard", replace: true });
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
+    } catch {
+      // Never let a client init failure blank the sign-in page.
+    }
+    return () => unsubscribe?.();
   }, [router]);
+
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
