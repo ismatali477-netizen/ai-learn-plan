@@ -12,13 +12,21 @@ import { ThemeToggle, useTheme, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
+    // Prefer the locally persisted session: it resolves instantly and works
+    // offline, so direct URL loads and refreshes never hang on a network call.
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session?.user) return { user: sessionData.session.user };
+
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    if (error || !data.user) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
     return { user: data.user };
   },
   component: AppShell,
 });
+
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
