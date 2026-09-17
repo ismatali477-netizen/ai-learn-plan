@@ -11,6 +11,9 @@ import { toast } from "sonner";
 import { Sparkles, Loader2, Mail } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — AI Study Planner" },
@@ -26,11 +29,19 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const router = useRouter();
+  const { redirect: redirectTo } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const goToApp = () => {
+    const target = redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("/auth")
+      ? redirectTo
+      : "/dashboard";
+    return router.navigate({ href: target, replace: true });
+  };
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -38,18 +49,20 @@ function AuthPage() {
       supabase.auth
         .getSession()
         .then(({ data }) => {
-          if (data.session) router.navigate({ to: "/dashboard", replace: true });
+          if (data.session) void goToApp();
         })
         .catch(() => { /* ignore — keep the form usable */ });
       const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-        if (session) router.navigate({ to: "/dashboard", replace: true });
+        if (session) void goToApp();
       });
       unsubscribe = () => sub.subscription.unsubscribe();
     } catch {
       // Never let a client init failure blank the sign-in page.
     }
     return () => unsubscribe?.();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, redirectTo]);
+
 
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
