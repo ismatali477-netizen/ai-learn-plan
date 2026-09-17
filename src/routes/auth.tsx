@@ -79,7 +79,7 @@ function AuthPage() {
         return;
       }
       toast.success("Welcome back!");
-      await router.navigate({ to: "/dashboard", replace: true });
+      await goToApp();
     } catch {
       toast.error("Unable to sign in right now. Please try again.");
     } finally {
@@ -126,7 +126,7 @@ function AuthPage() {
         return;
       }
       if (!result.redirected) {
-        await router.navigate({ to: "/dashboard", replace: true });
+        await goToApp();
       }
     } catch {
       toast.error("Google sign-in failed. Please try again.");
