@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Sparkles, Loader2, Mail } from "lucide-react";
+import { rememberSession } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
@@ -53,7 +54,10 @@ function AuthPage() {
         })
         .catch(() => { /* ignore — keep the form usable */ });
       const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-        if (session) void goToApp();
+        if (session) {
+          rememberSession(session);
+          void goToApp();
+        }
       });
       unsubscribe = () => sub.subscription.unsubscribe();
     } catch {
@@ -78,6 +82,7 @@ function AuthPage() {
         toast.error("Sign-in did not complete. Please try again.");
         return;
       }
+      rememberSession(data.session);
       toast.success("Welcome back!");
       await goToApp();
     } catch {

@@ -119,6 +119,7 @@ function AppShell() {
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
+    rememberSession(null);
     await supabase.auth.signOut();
     router.navigate({ to: "/", replace: true });
     toast.success("Successfully logged out");
