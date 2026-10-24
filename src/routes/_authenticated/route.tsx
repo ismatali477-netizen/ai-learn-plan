@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ThemeToggle, useTheme, type Theme } from "@/lib/theme";
+import { getRememberedSession, rememberSession } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -17,6 +18,18 @@ export const Route = createFileRoute("/_authenticated")({
     // offline, so direct URL loads and refreshes never hang on a network call.
     const { data: sessionData } = await supabase.auth.getSession();
     if (sessionData.session?.user) return { user: sessionData.session.user };
+
+    // Just signed in but the saved copy isn't readable yet: restore it from
+    // memory instead of sending the user back to the sign-in page.
+    const remembered = getRememberedSession();
+    if (remembered) {
+      const { data: restored } = await supabase.auth.setSession({
+        access_token: remembered.access_token,
+        refresh_token: remembered.refresh_token,
+      });
+      if (restored.session?.user) return { user: restored.session.user };
+      return { user: remembered.user };
+    }
 
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
@@ -106,6 +119,7 @@ function AppShell() {
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
+    rememberSession(null);
     await supabase.auth.signOut();
     router.navigate({ to: "/", replace: true });
     toast.success("Successfully logged out");
